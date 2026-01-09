@@ -1,16 +1,27 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+import sys
+
 block_cipher = None
+
+# Build datas dynamically per-platform
+datas = [('options.json', '.')]
+if sys.platform == 'win32':
+    # Bundle ffmpeg only on Windows, where we ship redistributables in repo
+    ff_bin_glob = 'redistributables/ffmpeg/bin/*'
+    ff_license = 'redistributables/ffmpeg/LICENSE'
+    if os.path.exists('redistributables/ffmpeg'):
+        if os.path.isdir('redistributables/ffmpeg/bin'):
+            datas.append((ff_bin_glob, 'redistributables/ffmpeg/bin'))
+        if os.path.isfile(ff_license):
+            datas.append((ff_license, 'redistributables/ffmpeg'))
 
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        ('redistributables/ffmpeg/bin/*', 'redistributables/ffmpeg/bin'),
-        ('redistributables/ffmpeg/LICENSE', 'redistributables/ffmpeg'),
-        ('options.json', '.'),
-    ],
+    datas=datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
