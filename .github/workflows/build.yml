@@ -17,7 +17,7 @@ jobs:
             output_name: SampleConverter-Windows.exe
             spec_file: sample_converter.spec
           - os: macos-latest
-            output_name: SampleConverter-macOS.app
+            output_name: SampleConverter-macOS.zip
             spec_file: sample_converter.spec
     
     runs-on: ${{ matrix.os }}
@@ -54,10 +54,11 @@ jobs:
         Move-Item -Path "dist\SampleConverter.exe" -Destination "dist\${{ matrix.output_name }}"
       shell: powershell
     
-    - name: Rename app bundle (macOS)
+    - name: Zip app bundle (macOS)
       if: runner.os == 'macOS'
       run: |
-        mv "dist/SampleConverter.app" "dist/${{ matrix.output_name }}"
+        # Create a zipped .app so the artifact is a single file
+        ditto -c -k --sequesterRsrc --keepParent "dist/SampleConverter.app" "dist/${{ matrix.output_name }}"
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
