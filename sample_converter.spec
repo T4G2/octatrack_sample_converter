@@ -39,9 +39,9 @@ if sys.platform == 'darwin':
     exe = EXE(
         pyz,
         a.scripts,
-        [],  # binaries added in COLLECT
-        [],  # zipfiles added in COLLECT
-        [],  # datas added in COLLECT
+        [],  # binaries will be added via BUNDLE
+        [],  # zipfiles via BUNDLE
+        [],  # datas via BUNDLE
         [],
         name='SampleConverter',
         debug=False,
@@ -58,18 +58,11 @@ if sys.platform == 'darwin':
         entitlements_file=None,
         icon=None,  # set to a .icns if you add one
     )
-    coll = COLLECT(
+    app = BUNDLE(
         exe,
         a.binaries,
         a.zipfiles,
         a.datas,
-        strip=False,
-        upx=True,
-        upx_exclude=[],
-        name='SampleConverter',
-    )
-    app = BUNDLE(
-        coll,
         name='SampleConverter.app',
         icon=None,  # set to .icns to brand the app
         bundle_identifier=None,
