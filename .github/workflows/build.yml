@@ -1,0 +1,75 @@
+name: Build Executables
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            output_name: SampleConverter-Windows.exe
+            spec_file: sample_converter.spec
+          - os: macos-latest
+            output_name: SampleConverter-macOS
+            spec_file: sample_converter.spec
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requierements.txt
+        pip install pyinstaller
+    
+    - name: Download FFmpeg (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install ffmpeg
+        mkdir -p redistributables/ffmpeg/bin
+        cp $(which ffmpeg) redistributables/ffmpeg/bin/
+    
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller ${{ matrix.spec_file }} --clean
+    
+    - name: Rename executable (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        Move-Item -Path "dist\SampleConverter.exe" -Destination "dist\${{ matrix.output_name }}"
+      shell: powershell
+    
+    - name: Rename executable (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        mv dist/SampleConverter dist/${{ matrix.output_name }}
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.output_name }}
+        path: dist/${{ matrix.output_name }}
+        retention-days: 90
+    
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/${{ matrix.output_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
