@@ -35,25 +35,66 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
-exe = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    [],
-    name='SampleConverter',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=True,  # Set to False to hide console window
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon=None,  # Add path to .ico file if you want a custom icon
-)
+if sys.platform == 'darwin':
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],  # binaries added in COLLECT
+        [],  # zipfiles added in COLLECT
+        [],  # datas added in COLLECT
+        [],
+        name='SampleConverter',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        upx_exclude=[],
+        runtime_tmpdir=None,
+        console=False,  # windowed app, no console
+        disable_windowed_traceback=False,
+        argv_emulation=True,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+        icon=None,  # set to a .icns if you add one
+    )
+    coll = COLLECT(
+        exe,
+        a.binaries,
+        a.zipfiles,
+        a.datas,
+        strip=False,
+        upx=True,
+        upx_exclude=[],
+        name='SampleConverter',
+    )
+    app = BUNDLE(
+        coll,
+        name='SampleConverter.app',
+        icon=None,  # set to .icns to brand the app
+        bundle_identifier=None,
+        info_plist=None,
+    )
+else:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        a.binaries,
+        a.zipfiles,
+        a.datas,
+        [],
+        name='SampleConverter',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        upx_exclude=[],
+        runtime_tmpdir=None,
+        console=True,  # keep console on Windows; change to False to hide
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+        icon=None,
+    )

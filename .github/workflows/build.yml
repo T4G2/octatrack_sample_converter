@@ -17,7 +17,7 @@ jobs:
             output_name: SampleConverter-Windows.exe
             spec_file: sample_converter.spec
           - os: macos-latest
-            output_name: SampleConverter-macOS
+            output_name: SampleConverter-macOS.app
             spec_file: sample_converter.spec
     
     runs-on: ${{ matrix.os }}
@@ -54,10 +54,10 @@ jobs:
         Move-Item -Path "dist\SampleConverter.exe" -Destination "dist\${{ matrix.output_name }}"
       shell: powershell
     
-    - name: Rename executable (macOS)
+    - name: Rename app bundle (macOS)
       if: runner.os == 'macOS'
       run: |
-        mv dist/SampleConverter dist/${{ matrix.output_name }}
+        mv "dist/SampleConverter.app" "dist/${{ matrix.output_name }}"
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
